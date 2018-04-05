@@ -10,9 +10,10 @@ class PlayerRoll extends Component {
             round: this.props.round,
             numOfRounds: this.props.numOfRounds,
             currentFrameScore: 0,
+            currentRollScore: 0,
             roll: 1,
             firstRollScore: 0,
-            SecondRollScoreL: 0,
+            SecondRollScore: 0,
             moveToNextPlayer: false,
             strike: false,
             spare: false,
@@ -45,7 +46,8 @@ class PlayerRoll extends Component {
             }
 
             this.setState({
-                currentPlayerInfo: currentPlayerInfo
+                currentPlayerInfo: currentPlayerInfo,
+                currentRollScore: firstRollScore
             })
 
             updateScore(currentPlayerInfo.generalScore);
@@ -88,6 +90,7 @@ class PlayerRoll extends Component {
             this.setState({
                 currentPlayerInfo: currentPlayerInfo,
                 currentFrameScore: this.state.currentFrameScore + secondRollScore,
+                currentRollScore: secondRollScore,
                 moveToNextPlayer: true,
                 extraRound: false
             })
@@ -122,8 +125,9 @@ class PlayerRoll extends Component {
         this.setState({
         roll: 1,
         firstRollScore: 0,
-        SecondRollScoreL: 0,
+        SecondRollScore: 0,
         currentFrameScore: 0,
+        currentRollScore: 0,
         moveToNextPlayer: false,
         strike: false,
         spare: false
@@ -132,11 +136,12 @@ class PlayerRoll extends Component {
     }
 
     render() {
-        let { currentFrameScore, roll, moveToNextPlayer, currentPlayerInfo } = this.state;
+        let { currentFrameScore, roll, moveToNextPlayer, currentPlayerInfo, currentRollScore } = this.state;
         return (
             <div>
                 <h3> Player {currentPlayerInfo.player} </h3>
-                <h2> Current Roll Score: {currentFrameScore}</h2>
+                <h2> Current Roll Score: {currentRollScore}</h2>
+                <h2> Current Frame Total Score: {currentFrameScore}</h2>
                 <h2 className={this.state.strike ? "" : "noDisplay"}>Strike!!!</h2>
                 <h2 className={this.state.spare ? "" : "noDisplay"}>Spare!!!</h2>
                 <button type="button" className={moveToNextPlayer ? "noDisplay" : "roll-button"} onClick={this.handleClickOnRoll.bind(this)}>Roll {roll}</button>

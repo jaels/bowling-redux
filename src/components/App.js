@@ -46,6 +46,7 @@ class App extends Component {
         let { arrOfPlayers, currentPlayerIndex, numOfPlayers, round, numOfRounds } = this.state;
         arrOfPlayers[currentPlayerIndex] = info;
         if (round === numOfRounds && currentPlayerIndex === numOfPlayers - 1) {
+            /*who won doesnt support a tie...*/
             this.setState
             ({
                 gameOver: true,
