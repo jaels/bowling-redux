@@ -16,7 +16,8 @@ class PlayerRoll extends Component {
             SecondRollScoreL: 0,
             moveToNextPlayer: false,
             strike: false,
-            spare: false
+            spare: false,
+            extraRound: false
         }
     }
 
@@ -29,7 +30,7 @@ class PlayerRoll extends Component {
 
 
     handleClickOnRoll() {
-        let { roll, currentPlayerInfo, numOfRounds, round } = this.state;
+        let { roll, currentPlayerInfo, numOfRounds, round, extraRound } = this.state;
         let { updateScore } = this.props;
         this.setState({strike: false, spare: false});
         if(roll === 1) {
@@ -37,9 +38,9 @@ class PlayerRoll extends Component {
             this.setState({currentFrameScore : firstRollScore, firstRollScore: firstRollScore, roll: 2});
             console.log("roll 1 is");
             console.log(firstRollScore);
-            if (currentPlayerInfo.bonusRolesLeft > 0) {
+            if (currentPlayerInfo.doublePointsRolls > 0 && !extraRound) {
                 currentPlayerInfo.generalScore += 2 * firstRollScore;
-                currentPlayerInfo.bonusRolesLeft-=1;
+                currentPlayerInfo.doublePointsRolls-=1;
             }
             else {
                 currentPlayerInfo.generalScore += firstRollScore;
@@ -51,23 +52,37 @@ class PlayerRoll extends Component {
 
             updateScore(currentPlayerInfo.generalScore);
 
-            if(firstRollScore === 10) {
-                currentPlayerInfo.bonusRolesLeft += 2;
+            if(firstRollScore === 10 && !extraRound) {
+                currentPlayerInfo.doublePointsRolls += 2;
                 this.setState({
                     currentPlayerInfo : currentPlayerInfo,
-                    strike: true,
-                    moveToNextPlayer: true
+                    strike: true
                 })
+                if (round === numOfRounds) {
+                    currentPlayerInfo.doublePointsRolls = 0;
+                    this.setState({
+                        roll: 1,
+                        currentPlayerInfo : currentPlayerInfo,
+                        extraRound: true
+                    })
+                }
+                else {
+                    this.setState({
+                        moveToNextPlayer: true,
+                        extraRound: false
+                    })
+                }
             }
         }
         else {
             let { firstRollScore } = this.state;
-            let secondRollScore = Math.floor(Math.random() * (11 - firstRollScore));
+            /*checks if the person had a strike in the last frame, got 2 extra rolls, and scrolled a strike. In that case I assumed the person gets a new set of cones to roll another last roll*/
+            let secondRollScore = firstRollScore === 10 && extraRound ? Math.floor(Math.random() * 11) : Math.floor(Math.random() * (11 - firstRollScore));
             console.log("roll 2 is");
             console.log(secondRollScore);
-            if (currentPlayerInfo.bonusRolesLeft > 0) {
+            if (currentPlayerInfo.doublePointsRolls > 0 && !extraRound) {
                 currentPlayerInfo.generalScore += 2 * secondRollScore;
-                currentPlayerInfo.bonusRolesLeft-=1;
+                currentPlayerInfo.doublePointsRolls-=1;
             }
             else {
                 currentPlayerInfo.generalScore += secondRollScore;
@@ -81,13 +96,25 @@ class PlayerRoll extends Component {
 
             updateScore(currentPlayerInfo.generalScore);
 
-            if(firstRollScore + secondRollScore === 10) {
-                    currentPlayerInfo.bonusRolesLeft += 1;
+            if(firstRollScore + secondRollScore === 10 && !extraRound) {
+                if(round === numOfRounds) {
+                    currentPlayerInfo.doublePointsRolls = 0;
+                    this.setState({
+                        moveToNextPlayer: false,
+                        spare: true,
+                        currentPlayerInfo: currentPlayerInfo,
+                        extraRound: true
+                    })
+                }
+                else {
+                    currentPlayerInfo.doublePointsRolls += 1;
                     this.setState({
                         spare: true,
                         currentPlayerInfo: currentPlayerInfo,
-                        moveToNextPlayer: true
+                        moveToNextPlayer: true,
+                        extraRound: false
                     })
+                }
             }
         }
     }

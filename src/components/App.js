@@ -27,7 +27,7 @@ class App extends Component {
             for (let i = 0; i < numOfPlayers; i++) {
                 arrOfPlayers.push({
                     player: i + 1,
-                    bonusRolesLeft: 0,
+                    doublePointsRolls: 0,
                     generalScore: 0
                 })
             }
@@ -104,7 +104,7 @@ class App extends Component {
                     return (
                         <div>
                             <header className="App-header">
-                                <h1 className="App-title">LET'S PLAY BOWLING !!!</h1>
+                                <h1 className="App-title">BOWLING WITHOUT MOVING</h1>
                                 <img src="bowling_img.jpeg" alt="bowling"/>
                             </header>
                             <div>
