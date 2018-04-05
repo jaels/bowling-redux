@@ -10,3 +10,5 @@ To start a development server, just type `npm start`. A browser window will open
 and you can play around with the app.
 
 You can run the test suite by running `npm test`.
+
+Sorry in advance for the rough design.

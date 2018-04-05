@@ -7,7 +7,6 @@ class PlayerRoll extends Component {
         super(props);
         this.state = {
             currentPlayerInfo: this.props.currentPlayerInfo,
-            gameOver: this.props.gameOver,
             round: this.props.round,
             numOfRounds: this.props.numOfRounds,
             currentFrameScore: 0,
@@ -28,7 +27,6 @@ class PlayerRoll extends Component {
       })
     }
 
-
     handleClickOnRoll() {
         let { roll, currentPlayerInfo, numOfRounds, round, extraRound } = this.state;
         let { updateScore } = this.props;
@@ -36,8 +34,8 @@ class PlayerRoll extends Component {
         if(roll === 1) {
             var firstRollScore = Math.floor(Math.random() * 11);
             this.setState({currentFrameScore : firstRollScore, firstRollScore: firstRollScore, roll: 2});
-            console.log("roll 1 is");
-            console.log(firstRollScore);
+            /*console.log("roll 1 is");
+            console.log(firstRollScore);*/
             if (currentPlayerInfo.doublePointsRolls > 0 && !extraRound) {
                 currentPlayerInfo.generalScore += 2 * firstRollScore;
                 currentPlayerInfo.doublePointsRolls-=1;
@@ -78,8 +76,8 @@ class PlayerRoll extends Component {
             let { firstRollScore } = this.state;
             /*checks if the person had a strike in the last frame, got 2 extra rolls, and scrolled a strike. In that case I assumed the person gets a new set of cones to roll another last roll*/
             let secondRollScore = firstRollScore === 10 && extraRound ? Math.floor(Math.random() * 11) : Math.floor(Math.random() * (11 - firstRollScore));
-            console.log("roll 2 is");
-            console.log(secondRollScore);
+            /*console.log("roll 2 is");
+            console.log(secondRollScore);*/
             if (currentPlayerInfo.doublePointsRolls > 0 && !extraRound) {
                 currentPlayerInfo.generalScore += 2 * secondRollScore;
                 currentPlayerInfo.doublePointsRolls-=1;
@@ -134,7 +132,7 @@ class PlayerRoll extends Component {
     }
 
     render() {
-        let { currentFrameScore, roll, moveToNextPlayer, currentPlayerInfo, gameOver } = this.state;
+        let { currentFrameScore, roll, moveToNextPlayer, currentPlayerInfo } = this.state;
         return (
             <div>
                 <h3> Player {currentPlayerInfo.player} </h3>
@@ -143,7 +141,7 @@ class PlayerRoll extends Component {
                 <h2 className={this.state.spare ? "" : "noDisplay"}>Spare!!!</h2>
                 <button type="button" className={moveToNextPlayer ? "noDisplay" : "roll-button"} onClick={this.handleClickOnRoll.bind(this)}>Roll {roll}</button>
 
-                <button type="button" className={moveToNextPlayer ? "next-button" : "noDisplay" } onClick={this.handleClickOnNext.bind(this)}>{gameOver ? "Game Over" : "Next Player"}</button>
+                <button type="button" className={moveToNextPlayer ? "next-button" : "noDisplay" } onClick={this.handleClickOnNext.bind(this)}>Next Player</button>
             </div>
         )
     }

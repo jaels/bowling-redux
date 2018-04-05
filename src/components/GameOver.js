@@ -12,9 +12,13 @@ class GameOver extends Component {
     render() {
         return (
             <div>
-                <h1>Game Over!!!</h1>
+                <h1>GAME OVER</h1>
                 <h2> The winner is {this.state.whoWon} </h2>
                 <button type="button" className="start-again-btn" onClick={this.props.startOver}>Start Over</button>
+                    <img src="simpsons.jpg" alt="track" style={{
+                        marginTop: "30px", width: "100%"
+                    }}/>
+
             </div>
         )
     }

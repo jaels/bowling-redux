@@ -7,6 +7,7 @@ import GameOver from './GameOver';
 class App extends Component {
     constructor(props) {
         super(props);
+        /*You can set the number of rounds in numOfRounds*/
         this.state = {
             currentPlayerIndex: 0,
             numOfPlayers: '',
@@ -14,14 +15,14 @@ class App extends Component {
             gameStarted: false,
             currentPlayerInfo: {},
             round: 1,
-            numOfRounds: 2,
+            numOfRounds: 10,
             gameOver: false,
             whoWon: 0
         }
     }
 
     handleClickOnStart() {
-        let {numOfPlayers, currentPlayerIndex} = this.state;
+        let { numOfPlayers, currentPlayerIndex } = this.state;
         if (numOfPlayers) {
             let arrOfPlayers = [];
             for (let i = 0; i < numOfPlayers; i++) {
@@ -36,14 +37,17 @@ class App extends Component {
 
     }
     updateInputValue(e) {
-        this.setState({numOfPlayers: e.target.value})
+        this.setState({
+            numOfPlayers: e.target.value
+        })
     }
 
     nextPlayer(info) {
-        let {arrOfPlayers, currentPlayerIndex, numOfPlayers, round, numOfRounds} = this.state;
+        let { arrOfPlayers, currentPlayerIndex, numOfPlayers, round, numOfRounds } = this.state;
         arrOfPlayers[currentPlayerIndex] = info;
         if (round === numOfRounds && currentPlayerIndex === numOfPlayers - 1) {
-            this.setState({
+            this.setState
+            ({
                 gameOver: true,
                 whoWon: numOfPlayers == 1
                     ? 1
@@ -66,7 +70,7 @@ class App extends Component {
     }
 
     updateScore(score) {
-        let {arrOfPlayers, currentPlayerIndex, currentPlayerInfo} = this.state;
+        let { arrOfPlayers, currentPlayerIndex, currentPlayerInfo } = this.state;
         currentPlayerInfo.generalScore = score;
         arrOfPlayers[currentPlayerIndex].generalScore = score;
         this.setState({arrOfPlayers: arrOfPlayers, currentPlayerInfo: currentPlayerInfo})
@@ -98,7 +102,9 @@ class App extends Component {
         } = this.state;
         const whatToRender = () => {
             if (gameOver) {
-                return (<GameOver whoWon={whoWon} startOver={this.startOver.bind(this)}/>)
+                return (
+                    <GameOver whoWon={whoWon} startOver={this.startOver.bind(this)}/>
+                )
             } else {
                 if (!gameStarted) {
                     return (
@@ -118,11 +124,18 @@ class App extends Component {
                     )
                 } else
                     return (
+                        <div style={{
+                            backgroundColor: "#DEB887"
+                        }}>
                             <div className="play-area">
                                 <ScoreState arrOfPlayers={arrOfPlayers} currentPlayerIndex={currentPlayerIndex}/>
                                 <h2>Round {round}</h2>
                                 <PlayerRoll currentPlayerInfo={currentPlayerInfo} gameOver={gameOver} round={round} numOfRounds={numOfRounds} nextPlayer={this.nextPlayer.bind(this)} updateScore={this.updateScore.bind(this)}/>
                             </div>
+                            <img src="bigLebowski.jpg" alt="track" style={{
+                                marginTop: "30px", width: "100%"
+                            }}/>
+                        </div>
                     )
             }
         }
