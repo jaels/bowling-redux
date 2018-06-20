@@ -1,155 +1,130 @@
 import React, { Component } from 'react';
 import '../styles/App.css';
+import { bindActionCreators } from "redux";
+import { connect } from "react-redux";
+import * as actions from "../actions/actions";
 
 
 class PlayerRoll extends Component {
-    constructor(props) {
-        super(props);
-        this.state = {
-            currentPlayerInfo: this.props.currentPlayerInfo,
-            round: this.props.round,
-            numOfRounds: this.props.numOfRounds,
-            currentFrameScore: 0,
-            currentRollScore: 0,
-            roll: 1,
-            firstRollScore: 0,
-            SecondRollScore: 0,
-            moveToNextPlayer: false,
-            strike: false,
-            spare: false,
-            extraRound: false
-        }
-    }
-
-    componentWillReceiveProps(nextProps) {
-      this.setState({
-          currentPlayerInfo: nextProps.currentPlayerInfo,
-          round: nextProps.round
-      })
-    }
-
     handleClickOnRoll() {
-        let { roll, currentPlayerInfo, numOfRounds, round, extraRound } = this.state;
+        let { roll, numOfRounds, round, extraRound, action, currentFrameScore, arrOfPlayers, currentPlayerIndex } = this.props;
         let { updateScore } = this.props;
-        this.setState({strike: false, spare: false});
+        action.setStrike(false);
+        action.setSpare(false);
         if(roll === 1) {
             var firstRollScore = Math.floor(Math.random() * 11);
-            this.setState({currentFrameScore : firstRollScore, firstRollScore: firstRollScore, roll: 2});
-            /*console.log("roll 1 is");
-            console.log(firstRollScore);*/
-            if (currentPlayerInfo.doublePointsRolls > 0 && !extraRound) {
-                currentPlayerInfo.generalScore += 2 * firstRollScore;
-                currentPlayerInfo.doublePointsRolls-=1;
+            action.setCurrentFrameScore(firstRollScore);
+            action.setFirstRollScore(firstRollScore);
+            action.setRoll(2);
+
+            if (arrOfPlayers[currentPlayerIndex].doublePointsRolls > 0 && !extraRound) {
+                arrOfPlayers[currentPlayerIndex].generalScore += 2 * firstRollScore;
+                arrOfPlayers[currentPlayerIndex].doublePointsRolls-=1;
             }
             else {
-                currentPlayerInfo.generalScore += firstRollScore;
+                arrOfPlayers[currentPlayerIndex].generalScore += firstRollScore;
             }
-
-            this.setState({
-                currentPlayerInfo: currentPlayerInfo,
-                currentRollScore: firstRollScore
-            })
-
-            updateScore(currentPlayerInfo.generalScore);
+            action.updateArrOfPlayers(arrOfPlayers);
 
             if(firstRollScore === 10 && !extraRound) {
-                currentPlayerInfo.doublePointsRolls += 2;
-                this.setState({
-                    currentPlayerInfo : currentPlayerInfo,
-                    strike: true
-                })
+                arrOfPlayers[currentPlayerIndex].doublePointsRolls += 2;
+                action.updateArrOfPlayers(arrOfPlayers);
+                action.setStrike(true);
+
                 if (round === numOfRounds) {
-                    currentPlayerInfo.doublePointsRolls = 0;
-                    this.setState({
-                        roll: 1,
-                        currentPlayerInfo : currentPlayerInfo,
-                        extraRound: true
-                    })
+                    arrOfPlayers[currentPlayerIndex].doublePointsRolls = 0;
+                    action.updateArrOfPlayers(arrOfPlayers);
+                    action.setRoll(1);
+                    action.setExtraRound(true);
                 }
                 else {
-                    this.setState({
-                        moveToNextPlayer: true,
-                        extraRound: false
-                    })
+                    action.moveToNextPlayer(true);
+                    action.setExtraRound(false);
                 }
             }
         }
         else {
-            let { firstRollScore } = this.state;
+            let { firstRollScore } = this.props;
             /*checks if the person had a strike in the last frame, got 2 extra rolls, and scrolled a strike. In that case I assumed the person gets a new set of cones to roll another last roll*/
             let secondRollScore = firstRollScore === 10 && extraRound ? Math.floor(Math.random() * 11) : Math.floor(Math.random() * (11 - firstRollScore));
-            /*console.log("roll 2 is");
-            console.log(secondRollScore);*/
-            if (currentPlayerInfo.doublePointsRolls > 0 && !extraRound) {
-                currentPlayerInfo.generalScore += 2 * secondRollScore;
-                currentPlayerInfo.doublePointsRolls-=1;
+            if (arrOfPlayers[currentPlayerIndex].doublePointsRolls > 0 && !extraRound) {
+                arrOfPlayers[currentPlayerIndex].generalScore += 2 * secondRollScore;
+                arrOfPlayers[currentPlayerIndex].doublePointsRolls-=1;
             }
             else {
-                currentPlayerInfo.generalScore += secondRollScore;
+                arrOfPlayers[currentPlayerIndex].generalScore += secondRollScore;
             }
-            this.setState({
-                currentPlayerInfo: currentPlayerInfo,
-                currentFrameScore: this.state.currentFrameScore + secondRollScore,
-                currentRollScore: secondRollScore,
-                moveToNextPlayer: true,
-                extraRound: false
-            })
-
-            updateScore(currentPlayerInfo.generalScore);
-
+            action.updateArrOfPlayers(arrOfPlayers);
+            action.setCurrentFrameScore(currentFrameScore+secondRollScore);
+            action.moveToNextPlayer(true);
+            action.setExtraRound(false);
             if(firstRollScore + secondRollScore === 10 && !extraRound) {
+                action.setSpare(true);
                 if(round === numOfRounds) {
-                    currentPlayerInfo.doublePointsRolls = 0;
-                    this.setState({
-                        moveToNextPlayer: false,
-                        spare: true,
-                        currentPlayerInfo: currentPlayerInfo,
-                        extraRound: true
-                    })
+                    arrOfPlayers[currentPlayerIndex].doublePointsRolls = 0;
+                    action.updateArrOfPlayers(arrOfPlayers);
+                    action.moveToNextPlayer(false);
+                    action.setExtraRound(true);
                 }
                 else {
-                    currentPlayerInfo.doublePointsRolls += 1;
-                    this.setState({
-                        spare: true,
-                        currentPlayerInfo: currentPlayerInfo,
-                        moveToNextPlayer: true,
-                        extraRound: false
-                    })
+                    arrOfPlayers[currentPlayerIndex].doublePointsRolls += 1;
+                    action.updateArrOfPlayers(arrOfPlayers);
+                    action.moveToNextPlayer(true);
+                    action.setExtraRound(false);
                 }
             }
         }
     }
 
     handleClickOnNext () {
-        let { currentPlayerInfo } = this.state;
-        this.setState({
-        roll: 1,
-        firstRollScore: 0,
-        SecondRollScore: 0,
-        currentFrameScore: 0,
-        currentRollScore: 0,
-        moveToNextPlayer: false,
-        strike: false,
-        spare: false
-    })
-        this.props.nextPlayer(currentPlayerInfo);
+        let { action } = this.props;
+        action.setRoll(1);
+        action.setFirstRollScore(0);
+        action.setCurrentFrameScore(0);
+        action.moveToNextPlayer(false);
+        action.setSpare(false);
+        action.setStrike(false);
+
+        this.props.nextPlayer();
     }
 
     render() {
-        let { currentFrameScore, roll, moveToNextPlayer, currentPlayerInfo, currentRollScore } = this.state;
+        let { currentFrameScore, roll, moveToNextPlayer, currentPlayerIndex, arrOfPlayers, strike, spare, firstRollScore } = this.props;
         return (
             <div>
-                <h3> Player {currentPlayerInfo.player} </h3>
-                <h2> Current Roll Score: {currentRollScore}</h2>
+                <h3> Player {arrOfPlayers[currentPlayerIndex].player} </h3>
                 <h2> Current Frame Total Score: {currentFrameScore}</h2>
-                <h2 className={this.state.strike ? "" : "noDisplay"}>Strike!!!</h2>
-                <h2 className={this.state.spare ? "" : "noDisplay"}>Spare!!!</h2>
+                <h2 className={strike ? "" : "noDisplay"}>Strike!!!</h2>
+                <h2 className={spare ? "" : "noDisplay"}>Spare!!!</h2>
                 <button type="button" className={moveToNextPlayer ? "noDisplay" : "roll-button"} onClick={this.handleClickOnRoll.bind(this)}>Roll {roll}</button>
-
                 <button type="button" className={moveToNextPlayer ? "next-button" : "noDisplay" } onClick={this.handleClickOnNext.bind(this)}>Next Player</button>
+
             </div>
         )
     }
 }
 
-export default PlayerRoll;
+function mapStateToProps(state, prop) {
+    return {
+        arrOfPlayers: state.arrOfPlayers,
+        currentPlayerIndex: state.currentPlayerIndex,
+        currentPlayerInfo: state.currentPlayerInfo,
+        currentFrameScore: state.currentFrameScore,
+        roll: state.roll,
+        firstRollScore: state.firstRollScore,
+        moveToNextPlayer: state.moveToNextPlayer,
+        strike: state.strike,
+        spare: state.spare,
+        extraRound: state.extraRound,
+        round: state.round,
+        numOfRounds: state.numOfRounds
+    }
+}
+
+function mapDispatchToProps(dispatch) {
+    return {
+        action: bindActionCreators(actions, dispatch)
+    }
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(PlayerRoll);

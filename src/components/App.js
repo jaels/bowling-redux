@@ -3,104 +3,79 @@ import '../styles/App.css';
 import PlayerRoll from './PlayerRoll';
 import ScoreState from './ScoreState';
 import GameOver from './GameOver';
+import {bindActionCreators} from "redux";
+import {connect} from "react-redux";
+import * as actions from "../actions/actions";
 
 class App extends Component {
-    constructor(props) {
-        super(props);
-        /*You can set the number of rounds in numOfRounds*/
-        this.state = {
-            currentPlayerIndex: 0,
-            numOfPlayers: '',
-            arrOfPlayers: [],
-            gameStarted: false,
-            currentPlayerInfo: {},
-            round: 1,
-            numOfRounds: 10,
-            gameOver: false,
-            whoWon: 0
-        }
-    }
-
     handleClickOnStart() {
-        let { numOfPlayers, currentPlayerIndex } = this.state;
+        let {arrOfPlayers, numOfPlayers, action} = this.props;
         if (numOfPlayers) {
-            let arrOfPlayers = [];
-            for (let i = 0; i < numOfPlayers; i++) {
-                arrOfPlayers.push({
-                    player: i + 1,
-                    doublePointsRolls: 0,
-                    generalScore: 0
-                })
-            }
-            this.setState({arrOfPlayers: arrOfPlayers, gameStarted: true, currentPlayerInfo: arrOfPlayers[currentPlayerIndex]})
+            action.setArrOfPlayers(numOfPlayers);
+            action.toggleGameStarted();
         }
-
     }
     updateInputValue(e) {
-        this.setState({
-            numOfPlayers: e.target.value
-        })
+        this.props.action.setNumberOfPlayers(e.target.value);
     }
 
-    nextPlayer(info) {
-        let { arrOfPlayers, currentPlayerIndex, numOfPlayers, round, numOfRounds } = this.state;
-        arrOfPlayers[currentPlayerIndex] = info;
+    nextPlayer() {
+        let {
+            arrOfPlayers,
+            currentPlayerIndex,
+            numOfPlayers,
+            round,
+            numOfRounds,
+            action
+        } = this.props;
         if (round === numOfRounds && currentPlayerIndex === numOfPlayers - 1) {
-            /*who won doesnt support a tie...*/
-            this.setState
-            ({
-                gameOver: true,
-                whoWon: numOfPlayers == 1
-                    ? 1
-                    : arrOfPlayers.reduce((prev, current) => (prev.generalScore > current.generalScore)
-                        ? prev.player
-                        : current.player)
-            })
-        } else {
-            if (currentPlayerIndex === numOfPlayers - 1) {
-                currentPlayerIndex = 0;
-                this.setState({
-                    round: round + 1
-                })
+            action.setGameOver(true);
+            if (numOfPlayers === 1) {
+                action.setWhoWon(1)
             } else {
-                currentPlayerIndex += 1
+                let winner = arrOfPlayers.reduce((prev, current) => (prev.generalScore > current.generalScore)
+                    ? prev.player
+                    : current.player)
+                action.setWhoWon(winner);
             }
-
-            this.setState({arrOfPlayers: arrOfPlayers, currentPlayerIndex: currentPlayerIndex, currentPlayerInfo: arrOfPlayers[currentPlayerIndex]})
+        } else {
+            let nextPlayer;
+            if (currentPlayerIndex === numOfPlayers - 1) {
+                nextPlayer = 0;
+                action.setRound(round + 1);
+            } else {
+                nextPlayer = currentPlayerIndex + 1;
+            }
+            action.setCurrentPlayerIndex(nextPlayer);
         }
     }
 
-    updateScore(score) {
-        let { arrOfPlayers, currentPlayerIndex, currentPlayerInfo } = this.state;
-        currentPlayerInfo.generalScore = score;
-        arrOfPlayers[currentPlayerIndex].generalScore = score;
-        this.setState({arrOfPlayers: arrOfPlayers, currentPlayerInfo: currentPlayerInfo})
+    updateArrOfPlayers(arrOfPlayers) {
+        this.props.action.updateArrOfPlayers(arrOfPlayers);
     }
 
     startOver() {
-        this.setState({
-            currentPlayerIndex: 0,
-            numOfPlayers: '',
-            arrOfPlayers: [],
-            gameStarted: false,
-            currentPlayerInfo: {},
-            round: 1,
-            gameOver: false,
-            whoWon: 0
-        })
+        let { action } = this.props;
+        action.setCurrentPlayerIndex(0);
+        action.setNumberOfPlayers("");
+        action.setArrOfPlayers([]);
+        action.toggleGameStarted();
+        action.setRound(1);
+        action.setGameOver(false);
+        action.setWhoWon(0);
     }
 
     render() {
         let {
             gameStarted,
             arrOfPlayers,
-            currentPlayerInfo,
             round,
             currentPlayerIndex,
             gameOver,
             whoWon,
-            numOfRounds
-        } = this.state;
+            numOfRounds,
+            numOfPlayers
+        } = this.props;
         const whatToRender = () => {
             if (gameOver) {
                 return (
@@ -118,7 +93,7 @@ class App extends Component {
                                 <p className="App-intro">
                                     Please choose number of players
                                 </p>
-                                <input id="num-of-players" type="number" onChange={this.updateInputValue.bind(this)} value={this.state.inputValue}/>
+                                <input id="num-of-players" type="number" onChange={this.updateInputValue.bind(this)}/>
                                 <button type="button" id="start-button" onClick={this.handleClickOnStart.bind(this)}>Start Game</button>
                             </div>
                         </div>
@@ -129,12 +104,15 @@ class App extends Component {
                             backgroundColor: "#DEB887"
                         }}>
                             <div className="play-area">
-                                <ScoreState arrOfPlayers={arrOfPlayers} currentPlayerIndex={currentPlayerIndex}/>
+                                <ScoreState arrOfPlayers={arrOfPlayers}
+                                currentPlayerIndex={currentPlayerIndex}/>
                                 <h2>Round {round}</h2>
-                                <PlayerRoll currentPlayerInfo={currentPlayerInfo} gameOver={gameOver} round={round} numOfRounds={numOfRounds} nextPlayer={this.nextPlayer.bind(this)} updateScore={this.updateScore.bind(this)}/>
+                                <PlayerRoll nextPlayer={this.nextPlayer.bind(this)}
+                                updateArrOfPlayers={this.updateArrOfPlayers.bind(this)}/>
                             </div>
                             <img src="bigLebowski.jpg" alt="track" style={{
-                                marginTop: "30px", width: "100%"
+                                marginTop: "30px",
+                                width: "100%"
                             }}/>
                         </div>
                     )
@@ -148,4 +126,23 @@ class App extends Component {
     }
 }
 
-export default App;
+function mapStateToProps(state, prop) {
+    return {
+        arrOfPlayers: state.arrOfPlayers,
+        currentPlayerIndex: state.currentPlayerIndex,
+        numOfPlayers: state.numOfPlayers,
+        gameStarted: state.gameStarted,
+        round: state.round,
+        numOfRounds: state.numOfRounds,
+        gameOver: state.gameOver,
+        whoWon: state.whoWon
+    }
+}
+
+function mapDispatchToProps(dispatch) {
+    return {
+        action: bindActionCreators(actions, dispatch)
+    }
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(App);
